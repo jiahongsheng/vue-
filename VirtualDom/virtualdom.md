@@ -2,7 +2,7 @@
    通过javascript对象表示树结构来构建一棵真正的DOM树，当数据状态发生变化时，可以直接修改这个javascript对象，接着对比修改后的javascript对象，记录
    下需要对页面做的Dom操作，然后将其应用到真正的DOM树上，实现视图的更新。
 ## 虚拟dom在vue2.0中的实现
-   ###创建VNode对象模拟DOM树
+   ### 创建VNode对象模拟DOM树
    在vue2.0中，virtual DOM是通过VNode类来表达的，每一个原生的Dom元素或者vue组件都对应一个VNode对象 
    ##### 1.VNode
         用来描述DOM节点的主要信息，包括tag、text、elm、data、parent、children等属性
