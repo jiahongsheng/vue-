@@ -44,9 +44,27 @@
  Vue.prototype._e =  renderElement
  ```
  ```
- 1. renderElementWithChildren方法的功能是给一个VNode对象添加若干个子VNode，因为整个virtual DOM是一种树状结构，每个节点都可能会有若干个子节点。
- 2. renderElement方法的功能是创建一个VNode对象，如果是一个reserved tag（比如html、head等合法的HTML标签），则会创建普通的DOM VNode对象；如果是
- 一个component tag（通过vue注册的自定义component），则会创建Compontent VNode 对象，它的VNodeCompontentOptions不为null。
+ 1. renderElementWithChildren方法的功能是给一个VNode对象添加若干个子VNode，
+ 因为整个virtual DOM是一种树状结构，每个节点都可能会有若干个子节点。
+ 2. renderElement方法的功能是创建一个VNode对象，如果是一个reserved tag（比如html、head等合法的HTML标签），
+ 则会创建普通的DOM VNode对象；如果是一个component tag（通过vue注册的自定义component），则会创建Compontent VNode 对象，
+ 它的VNodeCompontentOptions不为null。
  ```
 创建好VNode，下一步是将Virtual Dom渲染成真正的DOM
 ### VNode patch 生成 DOM树
+      VNode转换成真正的DOM是通过patch（oldVnode，vnode，hydrating）方法实现的
+      patch方法支持3个参数，其中oldVnode是一个真实的DOM或者是一个VNode对象，它表示当前的VNode；
+      vnode是VNode对象类型，它表示待替换的VNode；hydrating是bool类型，它表示是否直接使用服务器渲染Dom元素。
+      patch方法的运行逻辑看起来复杂。其中createElm和patchVnode是生成DOM的关键。
+##### 1. createElm（vnode，insertVnodeQueue）
+      该方法会根据vnode的数据结构创建真实的DOM节点，如果vnode有children，则会遍历这些子节点，递归调用createElm方法。
+      InsertedVNodeQueue是记录子节点创建顺序的队列，每创建一个DOM元素就会往这个队列中插入当前的VNode。
+      当整个VNode对象全部转换成真实的DOM树时，会依次调用这个队列中VNode hook的insert方法。
+##### 2.patchVnode（Vnode，vnode，insertedVnodeQueue）
+      该方法会通过比较新旧VNode节点，根据不同的状态对DOM做合理的更新操作（添加、删除、移动等），
+      整个过程还会依次调用prepatch、update、postpatch等钩子函数。
+      在编译阶段生成一些静态子树，在这个过程中由于不会改变而跳过比对。
+      动态子树比较过程中比较核心的部分就是当新旧VNode同时存在children，通过updateChildren方法对子节点做更新。
+#### 总结：
+1. VNode通过patch方法生成DOM后，会调用mounted hook。至此，整个vue实例就创建完成了。
+2. 当这个vue实例的watcher观察到数据变化时，会再次调用render方法生成新的VNode，接着调用patch方法对比新旧VNode来更新DOM。
